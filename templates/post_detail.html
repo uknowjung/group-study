@@ -1,24 +1,71 @@
-<h1>{{ post.subject }}</h1>
-<div>
-    <p>생성 날짜: {{ post.create_date }}<br>수정 날짜: {{ post.edited_at }}</p>
-</div>
-<div>
-    <h2>내용</h2>
-    {{ post.content }}
-</div>
-<div>
-    <h2>댓글</h2>
+{% load static %}
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <meta name="description" content="" />
+  <meta name="author" content="" />
+  <title>23년 하반기 취준 코테 대비 스터디</title>
+  <!-- Favicon-->
+  <link rel="icon" type="image/x-icon" href="{% static 'assets/favicon.ico' %}" />
+  <!-- Font Awesome icons (free version)-->
+  <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
+  <!-- Google fonts-->
+  <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css" />
+  <link href="https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic" rel="stylesheet" type="text/css" />
+  <!-- Core theme CSS (includes Bootstrap)-->
+  <link href="{% static 'css/styles.css' %}" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <link href="{% static 'css/calender.css' %}" rel="stylesheet">
+</head>
+<body id="page-top">
+<!-- Navigation-->
+<nav class="navbar navbar-expand-lg bg-secondary text-uppercase fixed-top" id="mainNav">
+    <div class="container">
+        <a class="navbar-brand" href="#page-top">{{ post.author.last_name }}{{ post.author.first_name }}의 포스팅 - {{ post.subject }}</a>
+        <button class="navbar-toggler text-uppercase font-weight-bold bg-primary text-white rounded" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+            Menu
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarResponsive">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item mx-0 mx-lg-1"><a class="nav-link py-3 px-0 px-lg-3 rounded" href="{% url 'index' %}">홈으로 돌아가기</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<!-- Masthead-->
+<header class="masthead text-center">
+    <h1>내용</h1>
+    <h3 class="py-5">{{ post.content }}</h3>
+    <div>
+    <h2 class="pt-5 pb-3">댓글({{ post.comment_set.count }}개)</h2>
+    <div>
+        {% for comment in post.comment_set.all %}
+        <h5>{{ comment.content }} - {{ comment.author.last_name }}{{ comment.author.first_name }}</h5>
+        {% endfor %}
+    </div>
     <form action="{% url 'comment_create' post.id %}" method="post">
     {% csrf_token %}
-    <textarea name="content" id="content" rows="15"></textarea>
-    <input type="submit" value="답변등록">
+    <textarea name="content" id="content" cols="50" rows="1"></textarea><br>
+    <input type="submit" class="btn btn-primary" value="등록">
     </form>
-    <h5>{{ post.comment_set.count }}개의 댓글이 있습니다.</h5>
-    <div>
-        <ul>
-        {% for comment in post.comment_set.all %}
-            <li>{{ comment.content }}</li>
-        {% endfor %}
-        </ul>
-    </div>
+
 </div>
+</header>
+<!-- hidden progress list-->
+<div class="my-progress-list">
+<ul>
+{% for progress in my_progress_list %}
+    <li class="li-complete-date">{{ progress.complete_date }}</li>
+{% endfor %}
+</ul>
+</div>
+<script src="{% static 'js/calender.js' %}"></script>
+<!-- Bootstrap core JS-->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Core theme JS-->
+<script src="{% static 'js/scripts.js' %}"></script>
+</body>
+</html>

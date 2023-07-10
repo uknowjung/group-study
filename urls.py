@@ -22,7 +22,8 @@ from groupstudy import views
 urlpatterns = [
     path("", views.index, name="index"),
     path('plan/<int:plan_id>/', views.plan_detail, name="plan_detail"),
-    path('answer/create/<int:post_id>/', views.comment_create, name='comment_create'),
+    path('post/<int:post_id>/', views.post_detail, name="post_detail"),
+    path('comment/create/<int:post_id>/', views.comment_create, name='comment_create'),
     path('progress-update/<str:username>/', views.progress_update, name='progress_update'),
     path('personal-page/<str:username>/', views.show_personal_page, name='personal_page'),
     path('login/', auth_views.LoginView.as_view(template_name="login.html"), name='login'),

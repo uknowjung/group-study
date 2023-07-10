@@ -39,7 +39,7 @@
 <header class="masthead text-center">
     <h1 class="page-section-heading text-center text-uppercase">전체 진도 현황</h1>
     <!-- calender-->
-    <div class="sec_cal">
+    <div class="sec_cal py-2">
       <div class="cal_nav">
         <a href="javascript:;" class="nav-btn go-prev">prev</a>
         <div class="year-month"></div>
@@ -57,6 +57,37 @@
         </div>
         <div class="dates"></div>
       </div>
+    </div>
+    <h1 class="page-section-heading text-center text-uppercase pt-5">포스팅 목록</h1>
+    <div class="container my-3">
+        <table class="table">
+            <thead>
+            <tr class="table-primary">
+                <th>번호</th>
+                <th>제목</th>
+                <th>작성일시</th>
+                <th>수정일시</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% if my_post_list %}
+            {% for my_post in my_post_list %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>
+                    <a href="{% url 'post_detail' my_post.id %}">{{ my_post.subject }}</a>
+                </td>
+                <td>{{ my_post.create_date }}</td>
+                <td>{{ my_post.edited_at }}</td>
+            </tr>
+            {% endfor %}
+            {% else %}
+            <tr>
+                <td colspan="4">포스팅한 글이 없습니다.</td>
+            </tr>
+            {% endif %}
+            </tbody>
+        </table>
     </div>
 </header>
 <!-- hidden progress list-->
