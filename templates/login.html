@@ -2,7 +2,8 @@
 {% load static %}
 {% block content %}
 <body>
-<div class="container my-3">
+<div class="container my-5 mx-5">
+    <h1 class="py-2">로그인</h1>
     <form method="post" action="{% url 'login' %}">
         {% csrf_token %}
         {% include "form_errors.html" %}

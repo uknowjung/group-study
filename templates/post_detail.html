@@ -23,7 +23,7 @@
 <!-- Navigation-->
 <nav class="navbar navbar-expand-lg bg-secondary text-uppercase fixed-top" id="mainNav">
     <div class="container">
-        <a class="navbar-brand" href="#page-top">{{ post.author.last_name }}{{ post.author.first_name }}의 포스팅 - {{ post.subject }}</a>
+        <a class="navbar-brand" href="#page-top">{{ post.subject }}</a>
         <button class="navbar-toggler text-uppercase font-weight-bold bg-primary text-white rounded" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
             Menu
             <i class="fas fa-bars"></i>
@@ -36,23 +36,87 @@
     </div>
 </nav>
 <!-- Masthead-->
-<header class="masthead text-center">
-    <h1>내용</h1>
-    <h3 class="py-5">{{ post.content }}</h3>
-    <div>
-    <h2 class="pt-5 pb-3">댓글({{ post.comment_set.count }}개)</h2>
-    <div>
-        {% for comment in post.comment_set.all %}
-        <h5>{{ comment.content }} - {{ comment.author.last_name }}{{ comment.author.first_name }}</h5>
-        {% endfor %}
+<header class="masthead">
+    <!-- message 표시 -->
+    {% if messages %}
+    <div class="alert alert-danger my-3" role="alert">
+    {% for message in messages %}
+        <strong>{{ message.tags }}</strong>
+        <ul><li>{{ message.message }}</li></ul>
+    {% endfor %}
     </div>
-    <form action="{% url 'comment_create' post.id %}" method="post">
-    {% csrf_token %}
-    <textarea name="content" id="content" cols="50" rows="1"></textarea><br>
-    <input type="submit" class="btn btn-primary" value="등록">
-    </form>
-
-</div>
+    {% endif %}
+    <!-- Post -->
+    <div class="container">
+        <h2 class="border-bottom pb-2">내용</h2>
+        <div class="card my-3">
+            <div class="card-body">
+                <div class="card-text" style="white-space: pre-line;">{{ post.content }}</div>
+                <div class="d-flex justify-content-end">
+                    {% if post.edited_at %}
+                    <div class="badge bg-light text-dark p-2 text-start mx-3">
+                        <div class="mb-2">modified at</div>
+                        <div>{{ post.edited_at }}</div>
+                    </div>
+                    {% endif %}
+                    <div class="badge bg-light text-dark p-2 text-start">
+                        <div class="mb-2">{{ post.author.last_name }}{{ post.author.first_name }}</div>
+                        <div>{{ post.create_date }}</div>
+                    </div>
+                </div>
+                <div class="my-3">
+                    {% if request.user == post.author %}
+                    <a href="{% url 'post_modify' post.id  %}"
+                       class="btn btn-primary">수정</a>
+                    <!-- 포스트 삭제 기능 시작-->
+                    <a href="javascript:void(0)" class="delete btn btn-primary" data-uri="{% url 'post_delete' post.id  %}">삭제</a>
+                    <!-- 포스트 삭제 기능 끝-->
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <!-- 답변 -->
+        <h5 class="border-bottom my-3 pt-5 pb-2">{{post.comment_set.count}}개의 답변이 있습니다.</h5>
+        {% for comment in post.comment_set.all %}
+        <a id="comment_{{ comment.id }}"></a>
+        <div class="card my-3">
+            <div class="card-body">
+                <div class="card-text" style="white-space: pre-line;">{{ comment.content }}</div>
+                <div class="d-flex justify-content-end">
+                    {% if comment.edited_at %}
+                    <div class="badge bg-light text-dark p-2 text-start mx-3">
+                        <div class="mb-2">modified at</div>
+                        <div>{{ post.edited_at }}</div>
+                    </div>
+                    {% endif %}
+                    <div class="badge bg-light text-dark p-2 text-start">
+                        <div class="mb-2">{{ comment.author.last_name }}{{ comment.author.first_name }}</div>
+                        <div>{{ comment.create_date }}</div>
+                    </div>
+                </div>
+                <!-- 코멘트 수정 및 샥제 기능 시작-->
+                <div class="my-3">
+                    {% if request.user == comment.author %}
+                    <a href="{% url 'comment_modify' comment.id  %}"
+                       class="btn btn-primary">수정</a>
+                    <a href="#" class="delete btn btn-primary" data-uri="{% url 'comment_delete' comment.id  %}">삭제</a>
+                    {% endif %}
+                </div>
+                <!-- 코멘트 수정 및 샥제 기능 끝-->
+            </div>
+        </div>
+        {% endfor %}
+        <form action="{% url 'comment_create' post.id %}" method="post" class="my-3">
+            {% csrf_token %}
+            {% include "form_errors.html" %}
+            <div class="mb-3">
+                <label for="content" class="form-label pt-3">답변내용</label>
+                <textarea {% if not user.is_authenticated %}disabled{% endif %}
+                          name="content" id="content" class="form-control" rows="5"></textarea>
+            </div>
+            <input type="submit" value="답변등록" class="btn btn-primary">
+        </form>
+    </div>
 </header>
 <!-- hidden progress list-->
 <div class="my-progress-list">
@@ -67,5 +131,15 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
 <!-- Core theme JS-->
 <script src="{% static 'js/scripts.js' %}"></script>
+<script type='text/javascript'>
+const delete_elements = document.getElementsByClassName("delete");
+Array.from(delete_elements).forEach(function(element) {
+    element.addEventListener('click', function() {
+        if(confirm("정말로 삭제하시겠습니까?")) {
+            location.href = this.dataset.uri;
+        };
+    });
+});
+</script>
 </body>
 </html>

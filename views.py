@@ -1,9 +1,10 @@
 from datetime import datetime
 
+from django.contrib import messages
 from django.contrib.auth import authenticate, login, get_user_model
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseNotAllowed
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import render, get_object_or_404, redirect, resolve_url
 
 from .forms import UserForm, PostForm, CommentForm
 from .models import *
@@ -61,6 +62,37 @@ def post_detail(request, post_id):
 
 
 @login_required(login_url='login')
+def post_modify(request, post_id):
+    post = get_object_or_404(Post, pk=post_id)
+    if request.user != post.author:
+        messages.error(request, "수정 권한이 없습니다")
+        return redirect('post_detail', post_id=post.id)
+    if request.method == "POST":
+        form = PostForm(request.POST, instance=post)
+        if form.is_valid():
+            post = form.save(commit=False)
+            post.save()
+            return redirect('post_detail', post_id=post.id)
+    else:
+        form = PostForm(instance=post)
+    context = {
+        "form": form,
+        "post": post,
+    }
+    return render(request, 'post_form.html', context)
+
+
+@login_required(login_url='login')
+def post_delete(request, post_id):
+    post = get_object_or_404(Post, pk=post_id)
+    if request.user != post.author:
+        messages.error(request, '삭제권한이 없습니다')
+        return redirect('post_detail', post_id=post.id)
+    post.delete()
+    return redirect('personal_page', username=request.user.username)
+
+
+@login_required(login_url='login')
 def comment_create(request, post_id):
     post = get_object_or_404(Post, pk=post_id)
     if request.method == "POST":
@@ -70,11 +102,39 @@ def comment_create(request, post_id):
             comment.post = post
             comment.author = request.user
             comment.save()
-            return redirect('post_detail', post_id=post.id)
+            return redirect('{}#comment_{}'.format(resolve_url('post_detail', post_id=post.id), comment.id))
     else:
         return HttpResponseNotAllowed('포스팅만 가능합니다!')
     context = {'post': post, 'form': form}
     return render(request, 'post_detail.html', context)
+
+
+@login_required(login_url='login')
+def comment_modify(request, comment_id):
+    comment = get_object_or_404(Comment, pk=comment_id)
+    if request.user != comment.author:
+        messages.error(request, '수정권한이 없습니다')
+        return redirect('post_detail', post_id=comment.post.id)
+    if request.method == "POST":
+        form = CommentForm(request.POST, instance=comment)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.save()
+            return redirect('{}#comment_{}'.format(resolve_url('post_detail', post_id=comment.post.id), comment.id))
+    else:
+        form = CommentForm(instance=comment)
+    context = {'comment': comment, 'form': form}
+    return render(request, 'comment_form.html', context)
+
+
+@login_required(login_url='login')
+def comment_delete(request, comment_id):
+    comment = get_object_or_404(Comment, pk=comment_id)
+    if request.user != comment.author:
+        messages.error(request, '삭제권한이 없습니다')
+    else:
+        comment.delete()
+    return redirect('post_detail', post_id=comment.post.id)
 
 
 def signup(request):
